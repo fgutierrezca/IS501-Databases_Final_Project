@@ -100,7 +100,7 @@ CREATE TABLE Multas (
     MultaID INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL,
     Nombre VARCHAR(30),
     Descripcion VARCHAR(100),
-    CONSTRAINT DañoPK PRIMARY KEY (DañoID)
+    CONSTRAINT MultaPK PRIMARY KEY (MultaID)
 );
 
 CREATE TABLE Extras (
@@ -146,6 +146,7 @@ CREATE TABLE Ordenes (
     Localidad_DevolucionID INTEGER,
     Fecha_Devolucion DATE,
     SeguroID INTEGER,
+    EstatusID INTEGER,
     CONSTRAINT OrdenPK PRIMARY KEY (OrdenID),
     CONSTRAINT EmpleadoFK FOREIGN KEY (EmpleadoID) REFERENCES Empleado(EmpleadoID),
     CONSTRAINT OrdenesClienteFK FOREIGN KEY (ClienteID) REFERENCES Clientes(ClienteID),
@@ -154,6 +155,30 @@ CREATE TABLE Ordenes (
 	CONSTRAINT OrdenesLocalidadEntrega FOREIGN KEY (Localidad_EntregaID) REFERENCES Localidades(LocalidadID),
     CONSTRAINT OrdenesLocalidadDevolucion FOREIGN KEY (Localidad_DevolucionID) REFERENCES Localidades(LocalidadID),
     CONSTRAINT SeguroFK FOREIGN KEY (SeguroID) REFERENCES Seguro(SeguroID)
+);
+
+CREATE TABLE Reporte_Inicial (
+    ReporteInicialID INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL,
+    OrdenID INTEGER,
+    Fecha_Entrega DATE,
+    Kilometraje_Inicial NUMBER,
+    ReceptorID INTEGER,
+    Observaciones VARCHAR(200),
+    CONSTRAINT ReportePK PRIMARY KEY (ReporteInicialID),
+    CONSTRAINT ReporteOrdenFK FOREIGN KEY (OrdenID) REFERENCES Ordenes(OrdenID),
+    CONSTRAINT ReporteReceptorFK FOREIGN KEY (ReceptorID) REFERENCES Empleado(EmpleadoID)
+);
+
+CREATE TABLE Reporte_Final (
+    ReporteFinalID INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL,
+    OrdenID INTEGER,
+    Fecha_Recepcion DATE,
+    Kilometraje_Final NUMBER,
+    ReceptorID INTEGER,
+    Observaciones VARCHAR(200),
+    CONSTRAINT ReporteFinalPK PRIMARY KEY (ReporteFinalID),
+    CONSTRAINT ReporteOrden2FK FOREIGN KEY (OrdenID) REFERENCES Ordenes(OrdenID),
+    CONSTRAINT ReporteReceptor2FK FOREIGN KEY (ReceptorID) REFERENCES Empleado(EmpleadoID)
 );
 
 CREATE TABLE Facturas (
@@ -169,32 +194,8 @@ CREATE TABLE Facturas (
     Total NUMBER,
     CONSTRAINT FacturaPK PRIMARY KEY (FacturaID),
     CONSTRAINT FacturasOrdenFK FOREIGN KEY (OrdenID) REFERENCES Ordenes(OrdenID),
-    CONSTRAINT FacturasReporteFK FOREIGN KEY (ReporteID) REFERENCES Reporte_Final(ReporteFinalID),
+    CONSTRAINT FacturasReporteFK FOREIGN KEY (ReporteFinalID) REFERENCES Reporte_Final(ReporteFinalID),
     CONSTRAINT FacturasTarjetasFK FOREIGN KEY (TarjetaID) REFERENCES Tarjetas(TarjetaID)
-);
-
-CREATE TABLE Reporte_Inicial (
-    ReporteInicialID INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL,
-    OrdenID INTEGER,
-    Fecha_Entrega DATE,
-    Kilometraje_Inicial NUMBER,
-    ReceptorID INTEGER,
-    Observaciones VARCHAR(200),
-    CONSTRAINT ReportePK PRIMARY KEY (ReporteID),
-    CONSTRAINT ReporteOrdenFK FOREIGN KEY (OrdenID) REFERENCES Ordenes(OrdenID),
-    CONSTRAINT ReporteReceptorFK FOREIGN KEY (ReceptorID) REFERENCES Empleado(EmpleadoID)
-);
-
-CREATE TABLE Reporte_Final (
-    ReporteFinalID INTEGER GENERATED ALWAYS AS IDENTITY NOT NULL,
-    OrdenID INTEGER,
-    Fecha_Recepcion DATE,
-    Kilometraje_Final NUMBER,
-    ReceptorID INTEGER,
-    Observaciones VARCHAR(200),
-    CONSTRAINT ReportePK PRIMARY KEY (ReporteID),
-    CONSTRAINT ReporteOrdenFK FOREIGN KEY (OrdenID) REFERENCES Ordenes(OrdenID),
-    CONSTRAINT ReporteReceptorFK FOREIGN KEY (ReceptorID) REFERENCES Empleado(EmpleadoID)
 );
 
 CREATE TABLE DañosXReporte (
@@ -210,7 +211,7 @@ CREATE TABLE MultaXReporte (
     MultaID INTEGER NOT NULL,
     Costo NUMBER,
     CONSTRAINT MRReporteFK FOREIGN KEY (ReporteID) REFERENCES Reporte_Final(ReporteFinalID),
-    CONSTRAINT MRMultaFK FOREIGN KEY (MultaID) REFERENCES Multas(MultaID),
+    CONSTRAINT MRMultaFK FOREIGN KEY (MultaID) REFERENCES Multas(MultaID)
 );
 
 CREATE TABLE CaracteristicasXVehiculo (
